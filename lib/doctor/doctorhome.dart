@@ -1,0 +1,93 @@
+import 'package:doctor/admin/healthy_tip/tipview.dart';
+import 'package:doctor/auth/login_page.dart';
+import 'package:doctor/doctor/doctorappointments.dart';
+import 'package:doctor/doctor/doctorchat.dart';
+import 'package:doctor/doctor/doctordash.dart';
+import 'package:doctor/doctor/doctorprofile.dart';
+import 'package:doctor/user/editprofil.dart';
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+class Doctorhome extends StatefulWidget {
+  const Doctorhome({super.key});
+
+  @override
+  State<Doctorhome> createState() => _DoctorhomeState();
+}
+
+class _DoctorhomeState extends State<Doctorhome> {
+  int _currentIndex = 0;
+
+  final pages = const [
+    Doctordash(),
+    HealthTipsPage(),
+    DoctorChatListPage(),
+    Doctorprofile(),
+  ];
+  final titles = const ["Dashboard", "HealthTips", "Chat", "Profile"];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(titles[_currentIndex]),
+        actions: [
+          if (_currentIndex == 3) // Only show edit on profile page
+            IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const EditProfilePage()),
+                );
+              },
+            ),
+        ],
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: const EdgeInsets.only(top: 50),
+          children: [
+            const ListTile(leading: Icon(Icons.person), title: Text("Profile")),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text("Logout"),
+              onTap: () async {
+                await Supabase.instance.client.auth.signOut();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LoginPage()),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+      body: pages[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey,
+        onTap: (index) => setState(() => _currentIndex = index),
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.dashboard),
+            label: "Dashboard",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.health_and_safety),
+            label: "Tips",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.chat_bubble_outline),
+            label: "Chat",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            label: "Profile",
+          ),
+        ],
+      ),
+    );
+  }
+}
